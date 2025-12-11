@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=bob
+      - POSTGRES_PASSWORD=Secret12345!
+      - POSTGRES_DB=mydb
+    ports:
+      - 5432:5432
+    networks:
+      - compose_network
+    volumes:
+      - compose_volume:/var/lib/postgresql/18
+    restart: always
+
+  webapi1:
+    depends_on:
+      - postgres
+    build: 
+      context: WebApi1
+      dockerfile: Dockerfile
+    image: webapi:latest
+    container_name: webapi_app1
+    environment:
+      - Test=Hello
+      - ASPNETCORE_URLS=http://+:8000
+    ports:
+      - 8000:8080
+    networks:
+      - compose_network
+    restart: always
+
+  webapi2:
+    depends_on:
+      - postgres
+    build: 
+      context: WebApi2
+      dockerfile: Dockerfile
+    image: webapi:latest
+    container_name: webapi_app2
+    environment:
+      - Test=Hello
+      - ASPNETCORE_URLS=http://+:8001
+    ports:
+      - 8001:8080
+    networks:
+      - compose_network
+    restart: always
+
+networks:
+  compose_network:
+    driver: bridge
+volumes:
+  compose_volume:
